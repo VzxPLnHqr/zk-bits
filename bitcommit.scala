@@ -44,8 +44,8 @@ import boundary.break
 //       C = rH + bG
 //
 //   where:
-//      – g is a public group generator,
-//      – h is another generator whose discrete log relative to g is unknown,
+//      – G is a public group generator,
+//      – H is another generator whose discrete log relative to g is unknown,
 //      – r is random secret
 //
 //   If b = 0, the commitment becomes C = rH.
@@ -112,6 +112,9 @@ extension [E](a: E)(using G: AbelianGroup[E])
   def *(n: BigInt): E = G.multByScalar(a, n)
 
   /** Inverse: `-A` */
+  def unary_- :E = G.inverse(a)
+
+  /** Subtraction: `A - B` */
   def -(b: E) : E = a + G.inverse(b)
 
   /** Pretty-print */
@@ -238,7 +241,7 @@ class BitCommitProtocol[E](using group: AbelianGroup[E]):
       //
       // Rearranging the verification equation:
       //
-      //     t₁ = z₁*H - e₁*B
+      //     T₁ = z₁*H - e₁*B
       //
       // gives exactly the formula used below.
       //
@@ -249,7 +252,7 @@ class BitCommitProtocol[E](using group: AbelianGroup[E]):
       val e1 = randomScalar()  // Simulated challenge (as if issued by verifier)
       val z1 = randomScalar()  // Simulated response
       val T1 = (z1*H) - (e1*B) 
-      // Ensures the formal identity z₁*H = t₁ + e₁*B will hold true later.
+      // Ensures the formal identity z₁*H = T₁ + e₁*B will hold true later.
 
 
       //-----------------------------------------------------------------------
@@ -295,7 +298,7 @@ class BitCommitProtocol[E](using group: AbelianGroup[E]):
       val e0 = (eTotal - e1 + order) % order
       val z0 = (k0 + (e0 * r)) % order  // honest response
 
-      // The transcript (t₀, t₁, e₀, e₁, z₀, z₁) now satisfies both verifier equations
+      // The transcript (T₀, T₁, e₀, e₁, z₀, z₁) now satisfies both verifier equations
       // and the challenge‑sum constraint, convincing yet zero‑knowledge.
       BitCommitment(commitment, BitOrProof(T0, T1, e0, e1, z0, z1))
 
